@@ -46,7 +46,8 @@ def interpret_with_llm(frame_results: list) -> dict:
 
     {json.dumps(frame_results)}
 
-    Based on this data, return ONLY a JSON object with no extra text:
+    Based on this data, return ONLY a JSON object with absolutely no extra text, 
+    no explanation, no markdown, no code blocks, just raw JSON:
     {{
         "eye_contact_score": 0,
         "posture_score": 0,
@@ -63,15 +64,24 @@ def interpret_with_llm(frame_results: list) -> dict:
     confidence_score = how confident their body language was
     nervousness_score = how nervous they appeared
     overall_body_language_score = average of eye contact, posture and confidence
+    
+    IMPORTANT: Return ONLY the JSON object. No text before or after. No ```json blocks.
     """
 
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
         messages=[{"role": "user", "content": prompt}],
-        temperature=0.3
+        temperature=0.1
     )
 
-    result = response.choices[0].message.content
+    result = response.choices[0].message.content.strip()
+    
+    # clean any accidental markdown if present
+    if result.startswith("```"):
+        result = result.split("```")[1]
+        if result.startswith("json"):
+            result = result[4:]
+    
     return json.loads(result)
 
 def analyze_video_from_webcam(duration_seconds: int = 10) -> dict:

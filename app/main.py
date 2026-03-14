@@ -47,3 +47,12 @@ def evaluate(input: AnswerInput):
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+@app.post("/analyze-video")
+def analyze_video():
+    try:
+        from app.services.video_analysis import analyze_video_from_webcam
+        result = analyze_video_from_webcam(duration_seconds=10)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
