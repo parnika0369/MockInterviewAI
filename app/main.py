@@ -14,6 +14,11 @@ class AnswerInput(BaseModel):
     question: str
     answer: str
 
+class InterviewInput(BaseModel):
+    job_roles: str
+    duration_minutes: int
+    extra_info: str = ""
+
 @app.get("/health")
 def health_check():
     return {
@@ -47,12 +52,21 @@ def evaluate(input: AnswerInput):
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    
+
 @app.post("/analyze-video")
 def analyze_video():
     try:
         from app.services.video_analysis import analyze_video_from_webcam
         result = analyze_video_from_webcam(duration_seconds=10)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/generate-questions")
+def generate_questions(input: InterviewInput):
+    try:
+        from app.services.question_generator import generate_interview_questions
+        result = generate_interview_questions(input.job_roles, input.duration_minutes, input.extra_info)
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
