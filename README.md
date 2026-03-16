@@ -2,8 +2,6 @@
 
 > An AI-powered mock interview coaching platform that listens to your answers, watches your body language, evaluates your content, and gives you real feedback — before the real interview.
 
-Built by a 2nd year B.Tech AIML student (Batch 2028). Powered by **Groq LLaMA 3.3 70B**, **MediaPipe**, **OpenCV**, and **FastAPI**.
-
 ---
 
 ## What is MockInterviewAI?
