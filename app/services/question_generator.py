@@ -9,10 +9,37 @@ client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 # Questions per duration
 DURATION_TO_QUESTIONS = {
-    20: 4,
-    40: 8,
-    60: 12,
-    120: 20
+    2:   2,
+    3:   2,
+    4:   2,
+    5:   3,
+    10:  3,
+    15:  4,
+    20:  5,
+    25:  6,
+    30:  8,
+    35:  9,
+    40:  10,
+    45:  11,
+    50:  13,
+    55:  14,
+    60:  15,
+    65:  16,
+    70:  18,
+    75:  19,
+    80:  20,
+    85:  21,
+    90:  23,
+    95:  24,
+    100: 25,
+    105: 26,
+    110: 28,
+    115: 29,
+    120: 30,
+    150: 38,
+    180: 45,
+    210: 53,
+    240: 60
 }
 
 def generate_interview_questions(job_roles: str, duration_minutes: int, extra_info: str = "") -> dict:

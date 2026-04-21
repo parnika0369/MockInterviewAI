@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from dotenv import load_dotenv
 import os
+import threading
 
 load_dotenv()
 
@@ -14,17 +15,19 @@ class AnswerInput(BaseModel):
     question: str
     answer: str
 
-class InterviewInput(BaseModel):
+class QuestionGeneratorInput(BaseModel):
+    job_roles: str
+    duration_minutes: int
+    extra_info: str = ""
+
+class SimulationInput(BaseModel):
     job_roles: str
     duration_minutes: int
     extra_info: str = ""
 
 @app.get("/health")
 def health_check():
-    return {
-        "status": "ok",
-        "environment": os.getenv("APP_ENV")
-    }
+    return {"status": "ok", "environment": os.getenv("APP_ENV")}
 
 @app.post("/transcribe")
 def transcribe():
@@ -63,10 +66,40 @@ def analyze_video():
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/generate-questions")
-def generate_questions(input: InterviewInput):
+def generate_questions(input: QuestionGeneratorInput):
     try:
         from app.services.question_generator import generate_interview_questions
-        result = generate_interview_questions(input.job_roles, input.duration_minutes, input.extra_info)
+        result = generate_interview_questions(
+            input.job_roles,
+            input.duration_minutes,
+            input.extra_info
+        )
         return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/simulate-interview")
+def simulate_interview(input: SimulationInput):
+    try:
+        result_holder = {"result": None, "error": None}
+
+        def run_in_thread():
+            try:
+                from app.services.simulation import run_simulation
+                result_holder["result"] = run_simulation(
+                    input.job_roles,
+                    input.duration_minutes,
+                    input.extra_info
+                )
+            except Exception as e:
+                result_holder["error"] = str(e)
+
+        t = threading.Thread(target=run_in_thread)
+        t.start()
+        t.join()
+
+        if result_holder["error"]:
+            raise HTTPException(status_code=500, detail=result_holder["error"])
+        return result_holder["result"]
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
